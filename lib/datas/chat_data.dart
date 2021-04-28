@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:do_an_nv_app/modules/messages.dart';
 
 class FireStoreDatabaseMessage{
-  Future<void> upLoadMessage(String message, DateTime date) async{
+  Future<void> upLoadMessage(String message, DateTime date, String id, String name) async{
     return await FirebaseFirestore.instance.collection('messages').add({
-        'senderID' : 'nv',
-        'sender': 'Nhân viên',
+        'senderID' : id,
+        'sender': name,
         'message': message,
         'createAt': date
     });

@@ -1,18 +1,12 @@
-import 'file:///D:/AndroidStudioProjects/do_an_nv_app/lib/widget/beverage_item.dart';
-import 'file:///D:/AndroidStudioProjects/do_an_nv_app/lib/widget/catagory_item.dart';
 import 'package:do_an_nv_app/datas/data.dart';
-import 'package:do_an_nv_app/modules/beverage_snapshot.dart';
 import 'package:do_an_nv_app/pages/chat_page.dart';
 import 'package:do_an_nv_app/pages/order_page.dart';
+import 'package:do_an_nv_app/widget/beverage_item.dart';
 import 'package:do_an_nv_app/widget/catagory_section.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-import 'package:do_an_nv_app/modules/catagories.dart';
-import 'package:do_an_nv_app/datas/fake_datas.dart';
 import 'package:do_an_nv_app/modules/beverages.dart';
 import 'package:provider/provider.dart';
-import 'package:do_an_nv_app/modules/cart_item.dart';
 import 'package:do_an_nv_app/modules/tables.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:do_an_nv_app/pages/chechout_page.dart';
@@ -40,9 +34,10 @@ class _MenuPageState extends State<MenuPage> {
   }
   @override
   Widget build(BuildContext context) {
+    double size = MediaQuery.of(context).size.width/1000;
     FireStoreDatabaseBeverage fireStoreDatabaseBeverage = Provider.of<FireStoreDatabaseBeverage>(context);
-    FireStoreDatabaseTables fireStoreDatabaseTables = Provider.of<FireStoreDatabaseTables>(context);
-    final tableOrder = Provider.of<Tables>(context);
+    // FireStoreDatabaseTables fireStoreDatabaseTables = Provider.of<FireStoreDatabaseTables>(context);
+    // final tableOrder = Provider.of<Tables>(context);
     // final tableOrder = Provider.of<Tables>(context);
     Map<String, dynamic> argument = ModalRoute.of(context).settings.arguments;
     this.widget.tableNumber = argument['tableNumber'];
@@ -56,8 +51,10 @@ class _MenuPageState extends State<MenuPage> {
             stream: fireStoreDatabaseBeverage.getBeverageFromFireBase(),
             builder: (context, snapshot){
               // beverages = snapshot.data;
-              return SafeArea(
-                  child: Scaffold(
+              if(snapshot.hasData){
+                return SafeArea(
+                    child: Scaffold(
+                      resizeToAvoidBottomInset: false,
                       appBar: AppBar(
                         backgroundColor: Colors.green,
                         title: Text(widget.tableNumber != 0 ? 'Table ${widget.tableNumber}' : 'Take away',
@@ -75,7 +72,7 @@ class _MenuPageState extends State<MenuPage> {
                                           'orderID': widget.orderID,
                                           'waiterID': widget.waiterID,
                                           'waiterName': widget.waiterName
-                                    });
+                                        });
                                   }),
                               Positioned(
                                 top: 10,
@@ -92,7 +89,7 @@ class _MenuPageState extends State<MenuPage> {
                                     child: Consumer<Tables>(
                                       builder: (context, tableOrder, child){
                                         return Text('${tableOrder.coutItemInOrder(_tableID)}',
-                                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),);
+                                          style: TextStyle(fontSize: size*25, fontWeight: FontWeight.bold, color: Colors.white),);
                                       },
                                     )
                                 ),
@@ -107,7 +104,7 @@ class _MenuPageState extends State<MenuPage> {
                                       'orderID': widget.orderID,
                                       'waiterID': widget.waiterID,
                                       'waiterName': widget.waiterName
-                                });
+                                    });
                               })
                         ],
                         leading: IconButton(
@@ -115,14 +112,14 @@ class _MenuPageState extends State<MenuPage> {
                           onPressed: (){
                             Navigator.of(context).pop();
                             // fireStoreDatabaseTables.cancelOrder(_tableID, widget.orderID);
-                            tableOrder.removeOrder(_tableID);
+                            // tableOrder.removeOrder(_tableID);
                           },
                         ),
                       ),
-                      body: snapshot.hasData ? Column(
+                      body: Column(
                         children: [
                           Padding(padding: EdgeInsets.only(top: 10),
-                            child: Center(child: Text('Catagory',
+                            child: Center(child: Text('Danh mục',
                               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black45),),),),
                           CatagorySection(voidCallback: (catagoryId){
                             setState(() {
@@ -137,34 +134,37 @@ class _MenuPageState extends State<MenuPage> {
                               }
                             });
                           },),
-                          TextField(
-                            onChanged: (text){
-                              text = text.toLowerCase();
-                              setState(() {
-                                if(beverages == null){
-                                  beveragesDisplay = snapshot.data.where((docs){
-                                    var beverageName = docs.beverages.name.toLowerCase();
-                                    return beverageName.contains(text);
-                                  }).toList();
-                                }
-                                else{
-                                  beveragesDisplay = beverages.where((data){
-                                    var beverageName = data.beverages.name.toLowerCase();
-                                    return beverageName.contains(text);
-                                  }).toList();
-                                }
-                              });
-                            },
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              labelText: 'Search your drinks',
-                              prefixIcon: Icon(Icons.search),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: TextField(
+                              onChanged: (text){
+                                text = text.toLowerCase();
+                                setState(() {
+                                  if(beverages == null){
+                                    beveragesDisplay = snapshot.data.where((docs){
+                                      var beverageName = docs.beverages.name.toLowerCase();
+                                      return beverageName.contains(text);
+                                    }).toList();
+                                  }
+                                  else{
+                                    beveragesDisplay = beverages.where((data){
+                                      var beverageName = data.beverages.name.toLowerCase();
+                                      return beverageName.contains(text);
+                                    }).toList();
+                                  }
+                                });
+                              },
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                labelText: 'Tìm kiếm đồ uống',
+                                prefixIcon: Icon(Icons.search),
 
+                              ),
                             ),
                           ),
-                          SizedBox(height: 20,),
+                          SizedBox(height: 15,),
                           Divider(
                             color: Colors.grey,
                             thickness: 1,
@@ -175,7 +175,7 @@ class _MenuPageState extends State<MenuPage> {
                                 child: ListView.separated(
                                     itemBuilder: (context, beverageID) {
                                       Beverages _beverage = beveragesDisplay==null ? snapshot.data[beverageID].beverages : beveragesDisplay[beverageID].beverages;
-                                      return BeverageItemPage(beverages: _beverage,orderID: widget.tableNumber.toString(),);
+                                      return BeverageItemPage(beverages: _beverage,orderIdInCode: widget.tableNumber.toString(),);
                                     },
                                     separatorBuilder: (context, index) => Divider(
                                       color: Colors.grey,
@@ -186,17 +186,11 @@ class _MenuPageState extends State<MenuPage> {
                             ),
                           )
                         ],
-                      ) :
-                      Center(child: CircularProgressIndicator()),
-                      floatingActionButton: FloatingActionButton(
-                        onPressed: (){
-                          Navigator.pushNamed(context, ChatPage.routeName, arguments: {'waiterName': widget.waiterName});
-                        },
-                        child: Icon(Icons.message, color: Colors.white,),
                       ),
-                  )
-                // ),
-              );
+                    )
+                );
+              }
+              return Center(child: CircularProgressIndicator());
             },
           );
 

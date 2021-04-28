@@ -1,8 +1,11 @@
 import 'package:do_an_nv_app/datas/chat_data.dart';
+import 'package:do_an_nv_app/modules/employes.dart';
 import 'package:do_an_nv_app/widget/message_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 class MessagesWidget extends StatelessWidget {
+  final Employes employee;
+  MessagesWidget({@required this.employee});
   @override
   Widget build(BuildContext context) {
     FireStoreDatabaseMessage firebaseMessage = Provider.of<FireStoreDatabaseMessage>(context);
@@ -23,7 +26,7 @@ class MessagesWidget extends StatelessWidget {
                     return MessageWidget(
                       docs: messages[index].ref,
                       message: message,
-                      isMe: message.senderID == 'nv'
+                      isMe: message.senderID == employee.id
                     );
                 },
               );

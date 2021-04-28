@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:do_an_nv_app/modules/beverages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:do_an_nv_app/modules/cart_item.dart';
 class TableOrder{
@@ -12,6 +13,7 @@ class Tables with ChangeNotifier{
     return {..._orderTableList};
   }
 
+  // Them order trong code
   Future<void> addOrderInTable(String tableId, Cart cart) async{
     if(!_orderTableList.containsKey(tableId)){
       _orderTableList.putIfAbsent(tableId, () =>
@@ -29,8 +31,13 @@ class Tables with ChangeNotifier{
   }
 
 
-  void addItemInOrder(String orderID,String pdId, String name, int price, String desc, String image ){
-    _orderTableList[orderID].order.addToCart(pdId, name, price, desc,image);
+  void addItemInOrder(String orderID, Beverages beverage){
+    _orderTableList[orderID].order.addToCart(beverage);
+    notifyListeners();
+  }
+
+  void addItemInOrderWithNote(String orderID, Beverages beverage , String note){
+    _orderTableList[orderID].order.addToCartWithNote(beverage, note);
     notifyListeners();
   }
 
@@ -70,7 +77,7 @@ class Tables with ChangeNotifier{
     });
   }
   Future<void> sendOrder(String orderID, List<CartItem> carts,
-      String tableNum,String waiterName, String waiterID, String timeReq) async{
+      String tableNum,String waiterName, String waiterID, DateTime timeReq) async{
 
     final order =  FirebaseFirestore.instance.collection('tables').doc(tableNum).collection('orders').doc(orderID);
     order.update({
@@ -79,18 +86,18 @@ class Tables with ChangeNotifier{
     });
     WriteBatch batch = FirebaseFirestore.instance.batch();
 
-    await batch.set(order.collection('carts').doc(waiterName.trim()+timeReq), {
+    await batch.set(order.collection('carts').doc(waiterName.trim()+timeReq.toString()), {
       'waiterName': waiterName,
       'waiterID': waiterID,
       'time': timeReq,
       'check': false
     });
     carts.forEach((item) async{
-      await batch.set(order.collection('carts').doc(waiterName.trim()+timeReq).collection('cartItem').doc(), {
+      await batch.set(order.collection('carts').doc(waiterName.trim()+timeReq.toString()).collection('cartItem').doc(), {
         'id': item.id,
         'name': item.name,
         'quantity': item.quantity,
-        'desc': item.description,
+        'note': item.note,
         'price': item.price,
         'image': item.image
       });
@@ -115,7 +122,7 @@ class Tables with ChangeNotifier{
         .update({
       'requestCheckOut': true,
       'waiterRCO': waiter,
-      'timeRCO': DateTime.now().toString(),
+      'timeRCO': DateTime.now(),
       'waiterID': waiterID
     }).then((value) => print('checkout'));
   }

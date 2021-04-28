@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import 'package:do_an_nv_app/datas/chat_data.dart';
+import 'package:do_an_nv_app/modules/employes.dart';
 import 'package:do_an_nv_app/widget/messages_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 class ChatPage extends StatefulWidget {
-  String _waiterName;
+  Employes _employee;
   static const String routeName = '/ChatPage';
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -25,7 +26,7 @@ class _ChatPageState extends State<ChatPage> {
       "collapse_key" : "type_a",
       "notification" : {
         "body" : message,
-        "title": "${widget._waiterName} nhắn: "
+        "title": "${widget._employee.name} nhắn: "
       },
       "data" : {
         "type" : "messages"
@@ -48,10 +49,10 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     FireStoreDatabaseMessage firebaseMessage = Provider.of<FireStoreDatabaseMessage>(context);
     Map<String, dynamic> argument = ModalRoute.of(context).settings.arguments;
-    this.widget._waiterName = argument['waiterName'];
+    this.widget._employee = argument['employee'];
     void sendMessage() async{
       FocusScope.of(context).unfocus();
-      await firebaseMessage.upLoadMessage(message, DateTime.now());
+      await firebaseMessage.upLoadMessage(message, DateTime.now(), widget._employee.id, widget._employee.name);
       await _sendMessage();
       setState(() {
         message='';
@@ -68,7 +69,7 @@ class _ChatPageState extends State<ChatPage> {
             Expanded(
               child: Container(
                 padding: EdgeInsets.all(10),
-                child: MessagesWidget(),
+                child: MessagesWidget(employee: widget._employee),
               ),
             ),
             Container(

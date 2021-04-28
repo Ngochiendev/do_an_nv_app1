@@ -24,3 +24,13 @@ class CatagoryDoc {
         'catagoryIcon': icon
       };
 }
+
+class CatagorySnapshot{
+  CatagoryDoc doc;
+  DocumentReference reference;
+  CatagorySnapshot({this.doc, this.reference});
+
+  CatagorySnapshot.fromSnapshot(DocumentSnapshot snapshot):
+        doc = CatagoryDoc.fromJson(snapshot.data()),
+        reference = snapshot.reference;
+}

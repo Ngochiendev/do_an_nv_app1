@@ -1,8 +1,6 @@
 import 'package:do_an_nv_app/datas/data.dart';
 import 'package:do_an_nv_app/datas/fake_datas.dart';
-import 'package:do_an_nv_app/modules/beverages.dart';
 import 'package:do_an_nv_app/modules/catagories.dart';
-import 'package:do_an_nv_app/modules/catagory_snapshot.dart';
 import 'package:do_an_nv_app/widget/catagory_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

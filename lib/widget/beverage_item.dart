@@ -5,16 +5,18 @@ import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:do_an_nv_app/modules/tables.dart';
 import 'package:intl/intl.dart';
+import 'package:transparent_image/transparent_image.dart';
 class BeverageItemPage extends StatelessWidget {
-  String orderID;
+  String orderIdInCode;
   TextEditingController _noteController = TextEditingController();
   Beverages beverages;
   BeverageItemPage({
     @required this.beverages,
-    @required this.orderID
+    @required this.orderIdInCode
 });
   @override
   Widget build(BuildContext context) {
+    double size = MediaQuery.of(context).size.width/1000;
     final tableOrder = Provider.of<Tables>(context);
     void _onButtonShowModalSheet(){
       showModalBottomSheet(
@@ -57,23 +59,10 @@ class BeverageItemPage extends StatelessWidget {
                                 ],
                               ),
                               onPressed:(){
-                                tableOrder.addItemInOrder(orderID,
-                                    beverages.id,
-                                    beverages.name,
-                                    beverages.price,
-                                    _noteController.text,
-                                    beverages.image
+                                tableOrder.addItemInOrderWithNote(orderIdInCode,
+                                    beverages,
+                                    _noteController.text
                                 );
-                                // Scaffold.of(context).showSnackBar(SnackBar(
-                                //   content: Text('Add item to cart'),
-                                //   duration: Duration(seconds: 1),
-                                // ));
-                                // tableOrder.addOrderInTable(orderID, new Cart());
-                                // tableOrder.addItemInOrder(orderID,
-                                //     beverages.id,
-                                //     beverages.name,
-                                //     beverages.price,
-                                //     _noteController.text);
                                 Navigator.of(context).pop();
                               }
                             )
@@ -111,26 +100,68 @@ class BeverageItemPage extends StatelessWidget {
           leading: Container(
             width: 80,
             height: 60,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/${beverages.image}'),
-                fit: BoxFit.contain
-              )
+            child: FadeInImage.memoryNetwork(
+                placeholder: kTransparentImage,
+                image: beverages.image,
+                fit: BoxFit.cover,
+            )
+          ),
+          title: Text(beverages.name,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                fontSize: size*50,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepOrange
             ),
           ),
-          title: Text(beverages.name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepOrange),),
           isThreeLine: true,
           subtitle: Container(
-            width: 180,
+            width: 220,
             height: 55,
-            child: ListView(
+            padding: EdgeInsets.only(top: 5),
+            child: Column(
               children: [
-                Text(beverages.description, style: TextStyle(fontSize: 15,),),
+                // Row(
+                //   children: [
+                //     Icon(Icons.description_outlined, color: Colors.orange, size: 15,),
+                //     SizedBox(width: 5,),
+                //     Text('Mô tả:', style: TextStyle(
+                //       fontSize: 15, color: Colors.orange
+                //     ),)
+                //   ],
+                // ),
+                RichText(
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(context).style,
+                    children: [
+                      // WidgetSpan(child: Icon(Icons.description_outlined, color: Colors.orange, size: 14,),),
+                      WidgetSpan(child: Container(
+                        padding: EdgeInsets.only(right: 5),
+                        child: Text('Mô tả:',
+                            style: TextStyle(
+                                fontSize: size*42,
+                                color: Colors.orange,
+                                decoration: TextDecoration.underline
+                        ),),
+                      )),
+                      TextSpan(text: beverages.description,
+                        style: TextStyle(fontSize: size*40,),),
+
+                    ]
+                  ),
+                )
               ],
-            ),
+            )
           ),
-          trailing: Text('${NumberFormat('###,###','es_US').format(beverages.price)} VNĐ',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.red),),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('${NumberFormat('###,###','es_US').format(beverages.price)} VNĐ',
+                style: TextStyle(fontSize: size*40, fontWeight: FontWeight.bold, color: Colors.red),),
+            ],
+          )
         ),
         actionPane: SlidableDrawerActionPane(),
         actionExtentRatio: 0.2,
@@ -144,14 +175,7 @@ class BeverageItemPage extends StatelessWidget {
              content: Text('Add item to cart'),
              duration: Duration(seconds: 1),
            ));
-           tableOrder.addItemInOrder(orderID,
-               beverages.id,
-               beverages.name,
-               beverages.price,
-               'Không có ghi chú',
-               beverages.image
-           );
-            
+           tableOrder.addItemInOrder(orderIdInCode, beverages);
          },
        ),
        IconSlideAction(
@@ -159,7 +183,7 @@ class BeverageItemPage extends StatelessWidget {
          color: Colors.amberAccent,
          icon: Icons.info_outline,
          onTap: (){
-           Navigator.pushNamed(context, BeverageDetailPage.routeName, arguments: {'Beverage': beverages});
+           Navigator.pushNamed(context, BeverageDetailPage.routeName, arguments: {'Beverage': beverages, 'orderIdInCode': orderIdInCode});
          },
        ),
        IconSlideAction(

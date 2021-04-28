@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:do_an_nv_app/modules/beverages.dart';
 import 'package:flutter/cupertino.dart';
 
 class CartItem {
@@ -6,7 +7,7 @@ class CartItem {
   final int quantity;
   final String name;
   final int price;
-  final String description;
+  final String note;
   final String image;
 
   const CartItem({
@@ -14,7 +15,7 @@ class CartItem {
     @required this.price,
     @required this.name,
     @required this.image,
-    this.description,
+    this.note,
     this.quantity,
   });
   factory CartItem.fromJson(Map<String, dynamic> json) =>
@@ -22,7 +23,7 @@ class CartItem {
           id: json['id'],
           price: json['price'],
           name: json['name'],
-          description: json['desc'],
+          note: json['note'],
           quantity: json['quantity'],
           image: json['image']
       );
@@ -48,29 +49,41 @@ class Cart with ChangeNotifier{
     int get countItemInCart{
       return _countItem;
     }
-    void addToCart(String pdId, String name, int price, String desc, String image){
-      int newProductNum = 0;
-      if(_items.containsKey(pdId)) {
-        _items.putIfAbsent(pdId+'${newProductNum + 1}', () =>
+    void addToCart(Beverages beverage){
+      if(_items.containsKey(beverage.id)) {
+        _items.update(beverage.id, (exisItem) =>
             CartItem(id: DateTime.now().toString(),
-                price: price,
-                name: name,
-                quantity: 1,
-                description: desc,
-                image: image
+                price: exisItem.price,
+                name: exisItem.name,
+                quantity: exisItem.quantity +1,
+                note: exisItem.note,
+                image: exisItem.image
             ));
         _countItem++;
       }else {
-        _items.putIfAbsent(pdId, () =>
+        _items.putIfAbsent(beverage.id, () =>
             CartItem(id: DateTime.now().toString(),
-                price: price,
-                name: name,
+                price: beverage.price,
+                name: beverage.name,
                 quantity: 1,
-                description: desc,
-                image: image
+                note: 'Không có ghi chú',
+                image: beverage.image
             ));
         _countItem++;
       }
+      notifyListeners();
+    }
+    void addToCartWithNote(Beverages beverage, String note){
+
+      _items.putIfAbsent(beverage.id+'note${_countItem}', () =>
+          CartItem(id: DateTime.now().toString(),
+              price: beverage.price,
+              name: beverage.name,
+              quantity: 1,
+              note: note,
+              image: beverage.image
+          ));
+      _countItem++;
       notifyListeners();
     }
     void addQuantity(String pdId){
@@ -79,7 +92,7 @@ class Cart with ChangeNotifier{
               price: exisItem.price,
               name: exisItem.name,
               quantity: exisItem.quantity +1,
-              description: exisItem.description,
+              note: exisItem.note,
               image: exisItem.image
           ));
       _countItem++;
@@ -96,7 +109,7 @@ class Cart with ChangeNotifier{
               price: exisItem.price,
               name: exisItem.name,
               quantity: exisItem.quantity > 1 ? exisItem.quantity - 1 : exisItem.quantity,
-              description: exisItem.description,
+              note: exisItem.note,
               image: exisItem.image
           ));
       _countItem--;

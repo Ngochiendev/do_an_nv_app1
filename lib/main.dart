@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'pages/table_page.dart';
-import 'package:do_an_nv_app/modules/cart_item.dart';
 import 'package:do_an_nv_app/modules/tables.dart';
 import 'package:do_an_nv_app/pages/chechout_page.dart';
 
@@ -22,11 +21,12 @@ Future<void>_firebaseMessagingBackgroundHandler(RemoteMessage message) async{
   await Firebase.initializeApp();
   print('Handling a background message ${message.messageId}');
 }
+
 const AndroidNotificationChannel  channel = AndroidNotificationChannel(
   'high_importance_channel', // id
   'High Importance Notifications', // title
   'This channel is used for important notifications.', // description
-  importance: Importance.high,);
+  importance: Importance.max,);
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 Future<void> main() async{
@@ -60,6 +60,7 @@ class MyApp extends StatelessWidget {
         Provider<FireStoreDatabaseCatagory>(create: (context)=> FireStoreDatabaseCatagory()),
         Provider<FireStoreDatabaseBeverage>(create: (context) => FireStoreDatabaseBeverage()),
         Provider<FireStoreDatabaseMessage>(create: (context) => FireStoreDatabaseMessage()),
+        Provider<FireStoreDatabaseEmployers>(create: (context) => FireStoreDatabaseEmployers()),
         Provider<FireStoreDatabaseTables>(create: (context) => FireStoreDatabaseTables())
       ],
       child: MaterialApp(

@@ -1,13 +1,11 @@
-import 'package:do_an_nv_app/modules/cart_item.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:do_an_nv_app/modules/employes.dart';
 import 'package:do_an_nv_app/pages/chat_page.dart';
-import 'package:do_an_nv_app/pages/menu_page.dart';
 import 'package:do_an_nv_app/widget/table_item.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:do_an_nv_app/modules/tables.dart';
 
 class TablePage extends StatefulWidget {
   static const String routeName = '/TablePage';
@@ -16,16 +14,20 @@ class TablePage extends StatefulWidget {
 }
 
 class _TablePageState extends State<TablePage> {
-  String _name;
-  String _id;
+  Employes employee;
   bool _initialized = false;
   bool _error = false;
   bool _hadMessage = false;
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  _getToken(){
+  void  _getToken(){
     _firebaseMessaging.getToken().then((deviceToken) {
-      print('deveice token: $deviceToken');
+      if(deviceToken!=null){
+        FirebaseFirestore.instance.collection('tokens')
+            .doc(deviceToken).set({
+          'deviceToken': deviceToken
+        });
+      }
     });
   }
   _configureFirebaseMessaging(){
@@ -45,9 +47,10 @@ class _TablePageState extends State<TablePage> {
     });
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       // print('A new onMessageOpenedApp event was published: ${message}');
-      Navigator.pushNamed(context, ChatPage.routeName, arguments: {'waiterName': _name,});
+      Navigator.pushNamed(context, ChatPage.routeName, arguments: {'employee': employee,});
     });
   }
+
 
   void initializedFirebase() async {
     try{
@@ -62,16 +65,15 @@ class _TablePageState extends State<TablePage> {
   @override
   void initState() {
     // TODO: implement initState
-    // _getToken();
     _configureFirebaseMessaging();
     initializedFirebase();
+    _getToken();
     super.initState();
   }
   @override
   Widget build(BuildContext context) {
     Map<String, dynamic> argument = ModalRoute.of(context).settings.arguments;
-    _name = argument['name'];
-    _id = argument['id'];
+     employee = argument['employee'];
     if(_error){
       return Container(
         color: Colors.white,
@@ -98,16 +100,16 @@ class _TablePageState extends State<TablePage> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    actions: <Widget>[
-                      IconButton(icon: const Icon(
-                          Icons.agriculture_rounded, size: 30),
-                          onPressed: (){
-                            // var orderTime = DateTime.now();
-                            // String tableID = '0';
-                            // tableOrder.addOrderInTable(tableID, new Cart(), orderTime);
-                            // Navigator.pushNamed(context, MenuPage.routeName, arguments: {'tableNumber': 0, 'orderID': tableID+orderTime.toString()});
-                          })
-                    ],
+                    // actions: <Widget>[
+                    //   IconButton(icon: const Icon(
+                    //       Icons.agriculture_rounded, size: 30),
+                    //       onPressed: (){
+                    //         // var orderTime = DateTime.now();
+                    //         // String tableID = '0';
+                    //         // tableOrder.addOrderInTable(tableID, new Cart(), orderTime);
+                    //         // Navigator.pushNamed(context, MenuPage.routeName, arguments: {'tableNumber': 0, 'orderID': tableID+orderTime.toString()});
+                    //       })
+                    // ],
                   ),
                   body: GridView.builder(
                     padding: const EdgeInsets.all(20),
@@ -119,7 +121,7 @@ class _TablePageState extends State<TablePage> {
                     ),
                     itemCount: 15,
                     itemBuilder: (context, index){
-                      return TableItem(tableNum: index+1, waiterName: _name, waiterID: _id,);
+                      return TableItem(tableNum: index+1, waiterName: employee.name, waiterID: employee.id,);
                     },
                   ),
                   drawer: Drawer(
@@ -137,11 +139,11 @@ class _TablePageState extends State<TablePage> {
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(_name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                                  Text(employee.name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
                                   SizedBox(
                                     height: 5,
                                   ),
-                                  Text(_id,style: TextStyle(fontSize: 15, color: Colors.black54),)
+                                  Text(employee.id,style: TextStyle(fontSize: 15, color: Colors.black54),)
                                 ],
                               )
                             ],
@@ -164,7 +166,7 @@ class _TablePageState extends State<TablePage> {
                     children: [
                       FloatingActionButton(
                         onPressed: (){
-                          Navigator.pushNamed(context, ChatPage.routeName,  arguments: {'waiterName': _name,});
+                          Navigator.pushNamed(context, ChatPage.routeName,  arguments: {'employee': employee});
                           setState(() {
                             _hadMessage = false;
                           });

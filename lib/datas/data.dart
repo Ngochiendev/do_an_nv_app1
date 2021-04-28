@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:do_an_nv_app/modules/beverage_snapshot.dart';
 import 'package:do_an_nv_app/modules/beverages.dart';
 import 'package:do_an_nv_app/modules/catagories.dart';
-import 'package:do_an_nv_app/modules/catagory_snapshot.dart';
 import 'package:do_an_nv_app/modules/cart_item.dart';
+import 'package:do_an_nv_app/modules/employes.dart';
 import 'package:do_an_nv_app/modules/orders.dart';
 
 class FireStoreDatabaseCatagory{
@@ -90,11 +89,24 @@ class FireStoreDatabaseTables{
       'date': date,
       'received': false,
       'requestCheckOut': false,
-      'timeRCO': '', //Request Checkout
+      'timeRCO': null, //Request Checkout
       'waiterRCO': '',
       'waiterID': '',
       'cancelable': true
     })
         .then((value) => print("Đã thêm"));
+  }
+}
+
+class FireStoreDatabaseEmployers{
+  Stream<List<EmployeSnapshot>> getEmployeeDataFromFireBase(){
+    Stream<QuerySnapshot> stream = FirebaseFirestore.instance
+        .collection('employes').snapshots();
+
+    return stream.map((QuerySnapshot querySnapshot) =>
+      querySnapshot.docs.map((DocumentSnapshot docs) =>
+        EmployeSnapshot.fromSnapshot(docs)
+      ).toList()
+    );
   }
 }

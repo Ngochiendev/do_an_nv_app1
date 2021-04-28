@@ -12,6 +12,8 @@ class CatagoryItemPage extends StatelessWidget {
 });
   @override
   Widget build(BuildContext context) {
+    double size = MediaQuery.of(context).size.width/1000;
+
     RandomColor _random = RandomColor();
     Color _randomColor = _random.randomColor(
         colorBrightness: ColorBrightness.dark
@@ -19,6 +21,8 @@ class CatagoryItemPage extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(10),
       child: Container(
+        width: size*450,
+        height: size*300,
         padding: EdgeInsets.all(20),
         alignment: Alignment.center,
         child: Row(
@@ -27,10 +31,25 @@ class CatagoryItemPage extends StatelessWidget {
             Icon(
               iconData,
               color: Colors.white,
-              size: 30,
+              size: size*80,
             ),
-            Padding(padding: EdgeInsets.only(left: 20)),
-            Text(name, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, fontFamily: 'Pacifico',color: Colors.white),)
+            SizedBox(width: 15,),
+            Expanded(
+              child: Container(
+                height: size*110,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    Text(name,
+                      style: TextStyle(
+                          fontSize: size*60,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Pacifico',color: Colors.white
+                      ),)
+                  ],
+                ),
+              ),
+            )
           ],
         ),
         decoration: BoxDecoration(
