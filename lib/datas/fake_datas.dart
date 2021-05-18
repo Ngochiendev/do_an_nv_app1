@@ -16,3 +16,5 @@ Map<String, dynamic> catagoryColors = {
   'ne': Colors.deepPurple,
 };
 
+const deviceToken = "e_MKy0VbShKixb2ET7mBSP:APA91bE1qTNVMJfFTz-Zunyr_OCwILEn4BUsk20hvl5dd58aEZevpZz6kRduqEHJZI2x6oq-gDclT2sjtBJQRYY8-IwPt83ff3HgWNRx6XLiecNtuneVxdJJJ3ClV1HWTYCAVZ9ot3J6";
+

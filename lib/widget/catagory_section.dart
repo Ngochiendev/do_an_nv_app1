@@ -27,45 +27,54 @@ class _CatagorySectionState extends State<CatagorySection> {
   Widget build(BuildContext context) {
     FireStoreDatabaseCatagory fireStoreDatabaseCatagory = Provider.of<FireStoreDatabaseCatagory>(context);
     return Container(
-        height: 160,
-        padding: EdgeInsets.only(top: 7, bottom: 14),
-        child: StreamBuilder<List<CatagorySnapshot>>(
-          stream: fireStoreDatabaseCatagory.getCatagoryFromFireBase(),
-          builder: (context, snapshot){
-            if(snapshot.hasData)
-              return ListView.builder(
-                itemCount: snapshot.data.length,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (context, catagoryIndex){
-                  CatagoryDoc _catagory = snapshot.data[catagoryIndex].doc;
-                  return InkWell(
-                      child: CatagoryItemPage(
-                          iconData: catagoryID == _catagory.id ? Icons.check : catagoryIcons[_catagory.icon],
-                          name: _catagory.name,
-                          colors: catagoryColors[_catagory.id],
-                      ),
-                      splashColor: Colors.deepPurple,
-                      borderRadius: BorderRadius.circular(10),
-                      onTap: (){
-                        voidCallback(_catagory.id);
-                        setState(() {
-                          if (catagoryID == _catagory.id) {
-                            // beverages = FAKE_BEVERAGES.toList();
-                            // beveragesForDisPlay = beverages;
-                            catagoryID = '';
-                          } else {
-                            catagoryID = _catagory.id;
-                            // beverages = FAKE_BEVERAGES.where((beverage) => beverage.catagoryId == _catagory.id).toList();
-                            // beveragesForDisPlay = beverages;
-                          }
-                        });
-                        }
-                      );
-                  },
-              );
-            return Center(child: CircularProgressIndicator());
+        padding: EdgeInsets.only(top: 7, bottom: 7),
+        child: Column(
+          children: [
+            Padding(padding: EdgeInsets.only(top: 10),
+              child: Center(child: Text('Danh mục',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black45),),),),
+            Container(
+              height: 150,
+              child: StreamBuilder<List<CatagorySnapshot>>(
+                stream: fireStoreDatabaseCatagory.getCatagoryFromFireBase(),
+                builder: (context, snapshot){
+                  if(snapshot.hasData)
+                    return ListView.builder(
+                      itemCount: snapshot.data.length,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, catagoryIndex){
+                        CatagoryDoc _catagory = snapshot.data[catagoryIndex].doc;
+                        return InkWell(
+                            child: CatagoryItemPage(
+                              iconData: catagoryID == _catagory.id ? Icons.check : catagoryIcons[_catagory.icon],
+                              name: _catagory.name,
+                              colors: catagoryColors[_catagory.id],
+                            ),
+                            splashColor: Colors.deepPurple,
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: (){
+                              voidCallback(_catagory.id);
+                              setState(() {
+                                if (catagoryID == _catagory.id) {
+                                  // beverages = FAKE_BEVERAGES.toList();
+                                  // beveragesForDisPlay = beverages;
+                                  catagoryID = '';
+                                } else {
+                                  catagoryID = _catagory.id;
+                                  // beverages = FAKE_BEVERAGES.where((beverage) => beverage.catagoryId == _catagory.id).toList();
+                                  // beveragesForDisPlay = beverages;
+                                }
+                              });
+                            }
+                        );
+                      },
+                    );
+                  return Center(child: CircularProgressIndicator());
 
-          },
+                },
+              ),
+            ),
+          ],
         )
     );
   }

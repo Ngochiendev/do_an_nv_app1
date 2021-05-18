@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:do_an_nv_app/modules/employes.dart';
+import 'package:do_an_nv_app/modules/orders.dart';
 import 'package:do_an_nv_app/pages/chat_page.dart';
 import 'package:do_an_nv_app/widget/table_item.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:do_an_nv_app/datas/data.dart';
 
 class TablePage extends StatefulWidget {
   static const String routeName = '/TablePage';
@@ -88,6 +91,7 @@ class _TablePageState extends State<TablePage> {
     }
     else{
       if(_initialized){
+        FireStoreDatabaseOrders orders = Provider.of<FireStoreDatabaseOrders>(context);
         return WillPopScope(
           onWillPop: () async => false,
           child: SafeArea(
@@ -100,28 +104,55 @@ class _TablePageState extends State<TablePage> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    // actions: <Widget>[
-                    //   IconButton(icon: const Icon(
-                    //       Icons.agriculture_rounded, size: 30),
-                    //       onPressed: (){
-                    //         // var orderTime = DateTime.now();
-                    //         // String tableID = '0';
-                    //         // tableOrder.addOrderInTable(tableID, new Cart(), orderTime);
-                    //         // Navigator.pushNamed(context, MenuPage.routeName, arguments: {'tableNumber': 0, 'orderID': tableID+orderTime.toString()});
-                    //       })
-                    // ],
                   ),
-                  body: GridView.builder(
-                    padding: const EdgeInsets.all(20),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 3/2,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                    ),
-                    itemCount: 15,
-                    itemBuilder: (context, index){
-                      return TableItem(tableNum: index+1, waiterName: employee.name, waiterID: employee.id,);
+                  body: StreamBuilder<List<OrderSnapshot>>(
+                    stream: orders.getAllOrderFromFireBase(),
+                    builder: (context, snapshot){
+                      if(snapshot.hasData){
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(20),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            childAspectRatio: 3/2,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                          ),
+                          itemCount: 15,
+                          itemBuilder: (context, index){
+                            bool hasOrderNotDone = false;
+                            bool requestCheckOut, received;
+                            String orderID;
+                            snapshot.data.forEach((orderData) {
+                              if(orderData.orders.tableId==(index+1).toString()){
+                                hasOrderNotDone = true;
+                                orderID = orderData.orders.orderID;
+                                requestCheckOut = orderData.orders.requestCheckOut;
+                                received = orderData.orders.received;
+                              }
+                            });
+                            if(hasOrderNotDone){
+                              return TableItem(
+                                tableNum: index+1,
+                                waiterName: employee.name,
+                                waiterID: employee.id,
+                                orderID: orderID,
+                                checkout: false,
+                                requestCheckOut: requestCheckOut,
+                                received: received,
+                              );
+                            }
+                            else{
+                              return TableItem(
+                                tableNum: index+1,
+                                waiterName: employee.name,
+                                waiterID: employee.id,
+                                checkout: true,
+                              );
+                            }
+                          },
+                        );
+                      }
+                      return Center(child: CircularProgressIndicator(),);
                     },
                   ),
                   drawer: Drawer(
@@ -209,4 +240,5 @@ class _TablePageState extends State<TablePage> {
     }
 
   }
+
 }

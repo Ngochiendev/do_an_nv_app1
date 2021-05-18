@@ -24,7 +24,7 @@ class CheckOutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     double size = MediaQuery.of(context).size.width/1000;
 
-    FireStoreDatabaseTables tables = Provider.of<FireStoreDatabaseTables>(context);
+    FireStoreDatabaseOrders tables = Provider.of<FireStoreDatabaseOrders>(context);
     Map<String, dynamic> argument = ModalRoute
         .of(context)
         .settings
@@ -37,7 +37,7 @@ class CheckOutPage extends StatelessWidget {
     final tableOrder = Provider.of<Tables>(context);
     return SafeArea(
       child: FutureBuilder(
-        future: tables.getOrderDataFromFireBase(orderID, _tableID),
+        future: tables.getOrderDataFromFireBase(orderID),
         builder: (context, orderSnapshot){
           if(orderSnapshot.hasData){
             void _cancelOrder() async{
@@ -65,17 +65,18 @@ class CheckOutPage extends StatelessWidget {
                       }
                   ) :
                       Container()
-
                 ],
               ),
               body: StreamBuilder(
-                stream: tables.getItemFromFirebase(_tableID, orderID),
+                stream: tables.getItemCheckOutFromFirebase(orderID),
                 builder: (context,cartItemSnapshot){
                   if(cartItemSnapshot.hasData){
                     // OrderSnapshot snapshot = tables.getOrderDataFromFireBase(orderID, _tableID)
                     void _checkout() async{
+                      var timeRCO = DateTime.now();
                       tableOrder.addNotification(waiterName, _tableID, DateTime.now(), 'checkout', waiterID,orderID);
-                      tableOrder.comfirmCheckOut(orderID, _tableID, waiterName, waiterID);
+                      tableOrder.comfirmCheckOut(orderID, _tableID, waiterName, waiterID, timeRCO);
+                      sendNotification(waiterName,'yêu cầu thanh toán', _tableID, orderID, 'checkout', timeRCO);
                       Navigator.of(context).popUntil((route) => route.settings.name == TablePage.routeName);
                     }
                     Future<void> showAlert(){
@@ -89,7 +90,7 @@ class CheckOutPage extends StatelessWidget {
                               actions: [
                                 TextButton(
                                     onPressed: (){
-                                      Navigator.of(context).popUntil((route) => route.settings.name == MenuPage.routeName);
+                                      Navigator.of(context).popUntil((route) => route.settings.name == TablePage.routeName);
                                     },
                                     child: Text('Xác Nhận', style: TextStyle(color: Colors.green),)
                                 ),
@@ -100,16 +101,15 @@ class CheckOutPage extends StatelessWidget {
                     }
                     if(cartItemSnapshot.data.length == 0){
                       return Center(
-                        child: Text('Không có sản phẩm nào', style: TextStyle(fontSize: 20),),
+                        child:  Text('Chưa có đồ uống nào',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey, fontFamily: 'Pacifico'),),
                       );
                     }
                     else{
                       return Column(
                         children: [
                           Center(
-                            child: Text(tableNumber != 0
-                                ? 'Hóa đơn bàn: ${tableNumber}'
-                                : 'Hóa đơn mang về',
+                            child: Text('Hóa đơn bàn: ${tableNumber}',
                                 style: TextStyle(fontSize: size*56,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'Pacifico',
@@ -139,11 +139,6 @@ class CheckOutPage extends StatelessWidget {
                                   // _total+=(_item.price*_item.quantity);
                                   return CheckOutItem(
                                     cartItem: _item,
-                                    // id: _tableID,
-                                    // productId: _item.id,
-                                    // quantity: _item.quantity,
-                                    // price: _item.price,
-                                    // name: _item.name
                                   );
                                 },
                                 itemCount: cartItemSnapshot.data.length,
@@ -215,7 +210,7 @@ class CheckOutPage extends StatelessWidget {
                                             showAlert();
                                           }
                                           else{
-                                            sendNotification(waiterName,'yêu cầu thanh toán', _tableID, orderID, 'checkout');
+
                                             _checkout();
                                           }
                                         },

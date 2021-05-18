@@ -116,77 +116,119 @@ class _MenuPageState extends State<MenuPage> {
                           },
                         ),
                       ),
-                      body: Column(
-                        children: [
-                          Padding(padding: EdgeInsets.only(top: 10),
-                            child: Center(child: Text('Danh mục',
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black45),),),),
-                          CatagorySection(voidCallback: (catagoryId){
-                            setState(() {
-                              if (catagoryID == catagoryId) {
-                                beverages = snapshot.data;
-                                beveragesDisplay = beverages;
-                                catagoryID = '';
-                              } else {
-                                catagoryID = catagoryId;
-                                beverages = snapshot.data.where((data) => data.beverages.catagoryId == catagoryID).toList();
-                                beveragesDisplay = beverages;
-                              }
-                            });
-                          },),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: TextField(
-                              onChanged: (text){
-                                text = text.toLowerCase();
+                      body: CustomScrollView(
+                        slivers: [
+
+                          SliverAppBar(
+                            automaticallyImplyLeading: false,
+                            backgroundColor: Colors.white,
+                            expandedHeight: 200,
+                            collapsedHeight: 80,
+                            flexibleSpace: FlexibleSpaceBar(
+                              background: CatagorySection(voidCallback: (catagoryId){
                                 setState(() {
-                                  if(beverages == null){
-                                    beveragesDisplay = snapshot.data.where((docs){
-                                      var beverageName = docs.beverages.name.toLowerCase();
-                                      return beverageName.contains(text);
-                                    }).toList();
-                                  }
-                                  else{
-                                    beveragesDisplay = beverages.where((data){
-                                      var beverageName = data.beverages.name.toLowerCase();
-                                      return beverageName.contains(text);
-                                    }).toList();
+                                  if (catagoryID == catagoryId) {
+                                    beverages = snapshot.data;
+                                    beveragesDisplay = beverages;
+                                    catagoryID = '';
+                                  } else {
+                                    catagoryID = catagoryId;
+                                    beverages = snapshot.data.where((data) => data.beverages.catagoryId == catagoryID).toList();
+                                    beveragesDisplay = beverages;
                                   }
                                 });
-                              },
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
+                              },),
+                            ),
+                          ),
+                          SliverAppBar(
+                            automaticallyImplyLeading: false,
+                            backgroundColor: Colors.white,
+                            floating: true,
+                            expandedHeight: 90,
+                            flexibleSpace: FlexibleSpaceBar(
+                              background: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(bottom: BorderSide(color: Colors.black45, width: 1))
                                 ),
-                                labelText: 'Tìm kiếm đồ uống',
-                                prefixIcon: Icon(Icons.search),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                                  child: TextField(
+                                    onChanged: (text){
+                                      text = text.toLowerCase();
+                                      setState(() {
+                                        if(beverages == null){
+                                          beveragesDisplay = snapshot.data.where((docs){
+                                            var beverageName = docs.beverages.name.toLowerCase();
+                                            return beverageName.contains(text);
+                                          }).toList();
+                                        }
+                                        else{
+                                          beveragesDisplay = beverages.where((data){
+                                            var beverageName = data.beverages.name.toLowerCase();
+                                            return beverageName.contains(text);
+                                          }).toList();
+                                        }
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      labelText: 'Tìm kiếm đồ uống',
+                                      prefixIcon: Icon(Icons.search),
 
+                                    ),
+                                  ),
+                                ),
+                              )
+                            )
+                          ),
+                          SliverPadding(
+                            padding: EdgeInsets.only(top: 10),
+                            sliver: SliverFixedExtentList(
+                              itemExtent: 105,
+                              delegate: SliverChildBuilderDelegate(
+                                      (context, index){
+                                    Beverages _beverage = beveragesDisplay==null ?
+                                    snapshot.data[index].beverages
+                                        : beveragesDisplay[index].beverages;
+                                    return Column(
+                                      children: [
+                                        BeverageItemPage(
+                                          beverages: _beverage,
+                                          orderIdInCode: widget.tableNumber.toString(),
+                                        ),
+                                        Divider(
+                                          color: Colors.grey,
+                                          thickness: 1,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                  childCount: beveragesDisplay==null ? snapshot.data.length : beveragesDisplay.length
                               ),
                             ),
-                          ),
-                          SizedBox(height: 15,),
-                          Divider(
-                            color: Colors.grey,
-                            thickness: 1,
-                          ),
-                          Expanded(
-                            child: Container(
-                                alignment: Alignment.center,
-                                child: ListView.separated(
-                                    itemBuilder: (context, beverageID) {
-                                      Beverages _beverage = beveragesDisplay==null ? snapshot.data[beverageID].beverages : beveragesDisplay[beverageID].beverages;
-                                      return BeverageItemPage(beverages: _beverage,orderIdInCode: widget.tableNumber.toString(),);
-                                    },
-                                    separatorBuilder: (context, index) => Divider(
-                                      color: Colors.grey,
-                                      thickness: 1,
-                                    ),
-                                    itemCount: beveragesDisplay==null ? snapshot.data.length : beveragesDisplay.length
-                                )
-                            ),
                           )
+                          //
+                          // Expanded(
+                          //   child: Container(
+                          //       alignment: Alignment.center,
+                          //       child: ListView.separated(
+                          //           itemBuilder: (context, beverageID) {
+                          //             Beverages _beverage = beveragesDisplay==null ? snapshot.data[beverageID].beverages : beveragesDisplay[beverageID].beverages;
+                          //             return BeverageItemPage(beverages: _beverage,orderIdInCode: widget.tableNumber.toString(),);
+                          //           },
+                          //           separatorBuilder: (context, index) => Divider(
+                          //             color: Colors.grey,
+                          //             thickness: 1,
+                          //           ),
+                          //           itemCount: beveragesDisplay==null ? snapshot.data.length : beveragesDisplay.length
+                          //       )
+                          //   ),
+                          // )
                         ],
                       ),
+
                     )
                 );
               }

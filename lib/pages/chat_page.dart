@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:do_an_nv_app/datas/chat_data.dart';
+import 'package:do_an_nv_app/datas/fake_datas.dart';
 import 'package:do_an_nv_app/modules/employes.dart';
 import 'package:do_an_nv_app/widget/messages_widget.dart';
 import 'package:flutter/cupertino.dart';
@@ -22,7 +23,7 @@ class _ChatPageState extends State<ChatPage> {
   var url = Uri.parse('https://fcm.googleapis.com/fcm/send');
   Future<void> _sendMessage() async{
     Map<String, dynamic> body ={
-      "to" : "dqA2AfXZSBC2gjp89uz_ns:APA91bGzBfFGrj2NilweqfbTRfUouy0gEQIfVXBmUt5nfDSZz1xtTFT1_-Qf2a5wQ3IJLwaBXiS62sYJQYzvw3h2kzilAW6uA522b1_LLp0r_m6Cy6kLTcNw0KYLWaoC_X2lrBGldAhi",
+      "to" : deviceToken,
       "collapse_key" : "type_a",
       "notification" : {
         "body" : message,

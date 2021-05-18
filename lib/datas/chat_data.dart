@@ -8,7 +8,7 @@ class FireStoreDatabaseMessage{
         'sender': name,
         'message': message,
         'createAt': date
-    });
+    }).then((value) => 'success');
   }
   Stream<List<MessagesSnapshot>> getMessageFromFirebase(){
     Stream<QuerySnapshot> stream = FirebaseFirestore.instance.collection('messages')

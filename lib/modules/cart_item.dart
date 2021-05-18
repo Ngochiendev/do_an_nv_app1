@@ -6,7 +6,7 @@ class CartItem {
   final String id;
   final int quantity;
   final String name;
-  final int price;
+  final double price;
   final String note;
   final String image;
 
@@ -21,7 +21,7 @@ class CartItem {
   factory CartItem.fromJson(Map<String, dynamic> json) =>
       CartItem(
           id: json['id'],
-          price: json['price'],
+          price: double.parse(json['price'].toString()),
           name: json['name'],
           note: json['note'],
           quantity: json['quantity'],
@@ -115,8 +115,8 @@ class Cart with ChangeNotifier{
       _countItem--;
       notifyListeners();
     }
-    int totalMoney(){
-      int sum=0;
+    double totalMoney(){
+      double sum=0;
       _items.forEach((pdId, item) {
         sum+=(item.price*item.quantity);
       });

@@ -43,33 +43,46 @@ class FireStoreDatabaseBeverage{
   }
 }
 
-class FireStoreDatabaseTables{
-  Stream<List<CartItemSnapshot>> getItemFromFirebase(String tableNum, String orderID){
-    Stream<QuerySnapshot> stream =
-        FirebaseFirestore
-          .instance.collection('tables').doc(tableNum)
-          .collection('orders').doc(orderID)
-          .collection('items')
-          .orderBy('id', descending: true)
-          .snapshots();
-    return stream.map((QuerySnapshot querySnapshot) =>
-      querySnapshot.docs.map((DocumentSnapshot docs) =>
-        CartItemSnapshot.fromSnapshot(docs)
-      ).toList()
-    );
-  }
+class FireStoreDatabaseOrders{
 
-  Future<OrderSnapshot> getOrderDataFromFireBase(String orderID, String tableNum){
+  Future<OrderSnapshot> getOrderDataFromFireBase(String orderID){
       return FirebaseFirestore.instance
-          .collection('tables').doc(tableNum)
           .collection('orders').doc(orderID)
           .get()
           .then((DocumentSnapshot snapshot) => OrderSnapshot.fromSnapshot(snapshot));
   }
-  Stream<List<OrderSnapshot>> getAllOrderFromFireBase(String tableNum){
+
+  Stream<List<CartItemSnapshot>> getItemOrderFromFirebase(String orderID){
+    Stream<QuerySnapshot> stream =
+    FirebaseFirestore
+        .instance.collection('orders').doc(orderID)
+        .collection('items')
+        .where('check', isEqualTo: false)
+        .snapshots();
+    return stream.map((QuerySnapshot querySnapshot) =>
+        querySnapshot.docs.map((DocumentSnapshot docs) =>
+            CartItemSnapshot.fromSnapshot(docs)
+        ).toList()
+    );
+  }
+
+  Stream<List<CartItemSnapshot>> getItemCheckOutFromFirebase(String orderID){
+    Stream<QuerySnapshot> stream =
+    FirebaseFirestore
+        .instance.collection('orders').doc(orderID)
+        .collection('items')
+        .where('check', isEqualTo: true)
+        .snapshots();
+    return stream.map((QuerySnapshot querySnapshot) =>
+        querySnapshot.docs.map((DocumentSnapshot docs) =>
+            CartItemSnapshot.fromSnapshot(docs)
+        ).toList()
+    );
+  }
+
+  Stream<List<OrderSnapshot>> getAllOrderFromFireBase(){
     Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('tables').doc(tableNum)
-        .collection('orders').orderBy('date',descending: true)
+        .collection('orders').where('checkout', isEqualTo: false)
         .snapshots();
     return stream.map((QuerySnapshot querySnapshot) =>
         querySnapshot.docs.map((DocumentSnapshot doc) =>
@@ -81,20 +94,21 @@ class FireStoreDatabaseTables{
   }
   Future<void> addOrderToFirebase(String tableId, DateTime date) async{
     final String orderID = tableId+date.toString();
-    final tables = FirebaseFirestore.instance.collection('tables').doc(tableId);
-    return await tables.collection('orders').doc(orderID)
+    final orders = FirebaseFirestore.instance.collection('orders');
+    return await orders.doc(orderID)
         .set({
+      'orderID': tableId+date.toString(),
       'total': 0,
       'checkout': false,
       'date': date,
+      'table': tableId,
       'received': false,
       'requestCheckOut': false,
       'timeRCO': null, //Request Checkout
       'waiterRCO': '',
-      'waiterID': '',
+      'waiterRCOID': '',
       'cancelable': true
-    })
-        .then((value) => print("Đã thêm"));
+    });
   }
 }
 

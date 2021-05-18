@@ -1,12 +1,13 @@
 import 'dart:convert';
 
+import 'package:do_an_nv_app/datas/fake_datas.dart';
 import 'package:http/http.dart' as http;
 
 var url = Uri.parse('https://fcm.googleapis.com/fcm/send');
 
-Future<void> sendNotification(String waiterName,String title, String tableNum, String orderID, String type) async{
+Future<void> sendNotification(String waiterName,String title, String tableNum, String orderID, String type, DateTime date) async{
   Map<String, dynamic> body ={
-    "to" : "dqA2AfXZSBC2gjp89uz_ns:APA91bGzBfFGrj2NilweqfbTRfUouy0gEQIfVXBmUt5nfDSZz1xtTFT1_-Qf2a5wQ3IJLwaBXiS62sYJQYzvw3h2kzilAW6uA522b1_LLp0r_m6Cy6kLTcNw0KYLWaoC_X2lrBGldAhi",
+    "to" : deviceToken,
     "collapse_key" : "type_a",
     "notification" : {
       "body" : "Nhân viên $type : $waiterName",
@@ -15,6 +16,7 @@ Future<void> sendNotification(String waiterName,String title, String tableNum, S
     "data" : {
       "tableNum" : tableNum,
       "orderID" : orderID,
+      "date": date.toString(),
       "type": type
     }
   };

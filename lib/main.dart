@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
         Provider<FireStoreDatabaseBeverage>(create: (context) => FireStoreDatabaseBeverage()),
         Provider<FireStoreDatabaseMessage>(create: (context) => FireStoreDatabaseMessage()),
         Provider<FireStoreDatabaseEmployers>(create: (context) => FireStoreDatabaseEmployers()),
-        Provider<FireStoreDatabaseTables>(create: (context) => FireStoreDatabaseTables())
+        Provider<FireStoreDatabaseOrders>(create: (context) => FireStoreDatabaseOrders())
       ],
       child: MaterialApp(
         title: 'CafeOrderApp NV',

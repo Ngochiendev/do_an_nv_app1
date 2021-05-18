@@ -32,18 +32,17 @@ class OrderPage extends StatelessWidget {
     this.waiterName= argument['waiterName'];
     this.waiterID = argument['waiterID'];
     this.tableID = tableNumber.toString();
-    // final cart = Provider.of<Cart>(context);
     final tableOrder = Provider.of<Tables>(context);
-    FireStoreDatabaseTables fireStoreDatabaseTables = Provider.of<FireStoreDatabaseTables>(context);
     Cart cart = tableOrder.orderTableList[tableID].order;
     List<CartItem> cartItems = cart.items.values.toList();
     List<String> productIds = cart.items.keys.toList();
     void _order() async{
       var dateTime = DateTime.now();
       DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:sss");
-      var timeReq = dateFormat.parse(dateTime.toString());
-      tableOrder.addNotification(waiterName, tableID, dateTime, 'order', waiterID, orderID);
-      tableOrder.sendOrder(orderID, cartItems, tableID,waiterName, waiterID, dateTime);
+      // var timeReq = dateFormat.parse(dateTime.toString());
+      await tableOrder.addNotification(waiterName, tableID, dateTime, 'order', waiterID, orderID);
+      await tableOrder.sendOrder(orderID, cartItems, tableID,waiterName, waiterID, dateTime);
+      sendNotification(waiterName,'có order mới', tableID, orderID, 'order', dateTime);
       Navigator.of(context).popUntil((route) => route.settings.name == TablePage.routeName);
       await Future.delayed(Duration(seconds: 1));
       tableOrder.removeOrder(tableNumber.toString());
@@ -75,7 +74,8 @@ class OrderPage extends StatelessWidget {
                         color: Colors.black)),
               ),
               Expanded(
-                child: cartItems.length > 0 ? AnimatedList(
+                child: cartItems.length > 0 ?
+                AnimatedList(
                     key: animationKey,
                     itemBuilder: (context, item, animation) {
                       if(cartItems.length!=0) {
@@ -109,7 +109,7 @@ class OrderPage extends StatelessWidget {
               SizedBox(height: 10,),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Row(
+                child: cartItems.length > 0 ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     RaisedButton(
@@ -127,12 +127,12 @@ class OrderPage extends StatelessWidget {
                         ],
                       ),
                       onPressed: () {
-                        sendNotification(waiterName,'có order mới', tableID, orderID, 'order');
                         _order();
                       },
                     )
                   ],
-                ),
+                )
+                    : SizedBox()
               ),
               SizedBox(height: 10,)
             ],

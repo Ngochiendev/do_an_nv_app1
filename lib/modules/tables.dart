@@ -79,52 +79,44 @@ class Tables with ChangeNotifier{
   Future<void> sendOrder(String orderID, List<CartItem> carts,
       String tableNum,String waiterName, String waiterID, DateTime timeReq) async{
 
-    final order =  FirebaseFirestore.instance.collection('tables').doc(tableNum).collection('orders').doc(orderID);
+    final order =  FirebaseFirestore.instance.collection('orders').doc(orderID);
     order.update({
       'received': false,
       'cancelable': false,
     });
     WriteBatch batch = FirebaseFirestore.instance.batch();
 
-    await batch.set(order.collection('carts').doc(waiterName.trim()+timeReq.toString()), {
+    await batch.set(order.collection('waitersOrder').doc(waiterID), {
       'waiterName': waiterName,
       'waiterID': waiterID,
       'time': timeReq,
       'check': false
     });
     carts.forEach((item) async{
-      await batch.set(order.collection('carts').doc(waiterName.trim()+timeReq.toString()).collection('cartItem').doc(), {
+      await batch.set(order.collection('items').doc(), {
         'id': item.id,
         'name': item.name,
         'quantity': item.quantity,
         'note': item.note,
         'price': item.price,
-        'image': item.image
+        'image': item.image,
+        'check': false
       });
     });
     batch.commit();
   }
   void cancelOrder(String tableNum, String orderID) async{
-    final order = FirebaseFirestore.instance.collection('tables').doc(tableNum)
-        .collection('orders').doc(orderID);
+    final order = FirebaseFirestore.instance.collection('orders').doc(orderID);
     await order.delete();
-    //Xoa cart
-    // await order.collection('carts').snapshots()
-    //     .forEach((QuerySnapshot querySnapshot) {
-    //       querySnapshot.docs.forEach((element) {
-    //         element.reference.delete();
-    //       });
-    // });
-    // Xoa order
   }
-  Future<void> comfirmCheckOut(String orderID, String tableNum, String waiter, String waiterID) async{
-    return await FirebaseFirestore.instance.collection('tables').doc(tableNum).collection('orders').doc(orderID)
+  Future<void> comfirmCheckOut(String orderID, String tableNum, String waiter, String waiterID, DateTime date) async{
+    return await FirebaseFirestore.instance.collection('orders').doc(orderID)
         .update({
       'requestCheckOut': true,
       'waiterRCO': waiter,
-      'timeRCO': DateTime.now(),
+      'timeRCO': date,
       'waiterID': waiterID
-    }).then((value) => print('checkout'));
+    });
   }
   // Future<int> getOrderTotal(String orderID,String t){}
 
