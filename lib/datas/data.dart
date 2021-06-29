@@ -52,6 +52,21 @@ class FireStoreDatabaseOrders{
           .then((DocumentSnapshot snapshot) => OrderSnapshot.fromSnapshot(snapshot));
   }
 
+  Stream<List<WaitersOrderSnapshot>> getWaitersFromFirebase(String orderID){
+    Stream<QuerySnapshot> stream =
+    FirebaseFirestore
+        .instance.collection('orders').doc(orderID)
+        .collection('waitersOrder')
+        .orderBy('time', descending: true)
+        .snapshots();
+
+    return stream.map((QuerySnapshot querySnapshot) =>
+        querySnapshot.docs.map((DocumentSnapshot docs) =>
+            WaitersOrderSnapshot.fromSnapshot(docs)
+        ).toList()
+    );
+  }
+
   Stream<List<CartItemSnapshot>> getItemOrderFromFirebase(String orderID){
     Stream<QuerySnapshot> stream =
     FirebaseFirestore

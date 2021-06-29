@@ -5,19 +5,22 @@ class Employes{
   final String name;
   final String id;
   final String pass;
+  final List tableAssign;
 
-  const Employes({@required this.name, @required this.id, @required this.pass});
+  const Employes({@required this.name, @required this.id, @required this.pass, @required this.tableAssign});
   factory Employes.fromJson(Map<String , dynamic> json) =>
       Employes(
           name: json['name'],
           id: json['id'],
           pass: json['pass'],
+          tableAssign: json['tableAssign']
       );
   Map<String, dynamic> toJson() =>
       {
         'name' : name,
         'id' : id,
-        'pass': pass
+        'pass': pass,
+        'tableAssign' : tableAssign
       };
 }
 class EmployeSnapshot{

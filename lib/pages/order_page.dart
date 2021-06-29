@@ -75,28 +75,22 @@ class OrderPage extends StatelessWidget {
               ),
               Expanded(
                 child: cartItems.length > 0 ?
-                AnimatedList(
-                    key: animationKey,
-                    itemBuilder: (context, item, animation) {
+                ListView.builder(
+                    itemBuilder: (context, itemIndex) {
                       if(cartItems.length!=0) {
-                        return _builItem(
-                            cartItems[item],
-                            tableID,
-                            productIds[item],
-                            item,
-                            animation
+                        return OrderItem(
+                            cartItem: cartItems[itemIndex],
+                            tableOrderID: tableID,
+                            productID: productIds[itemIndex],
                         );
                       }else return Center(
                         child: Text('Không có đồ uống nào',
                           style: TextStyle(fontSize: 25, color: Colors.grey, fontFamily: 'Pacifico'),),
                       );
                     },
-                    // separatorBuilder: (context, index) =>
-                    //     Divider(
-                    //       color: Colors.grey,
-                    //       thickness: 1,
-                    //     ),
-                    initialItemCount: cart.items.length) :
+
+                   itemCount: cart.items.length,
+                ) :
                 Center(
                   child:  Text('Chưa có đồ uống nào',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey, fontFamily: 'Pacifico'),),
@@ -107,6 +101,8 @@ class OrderPage extends StatelessWidget {
                 thickness: 2,
               ),
               SizedBox(height: 10,),
+
+              // Confirm Order Button
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 child: cartItems.length > 0 ? Row(
@@ -143,19 +139,19 @@ class OrderPage extends StatelessWidget {
 
   }
 
-  Widget _builItem(CartItem cartItem, String tableID, String productID, int index, Animation<double> animation ){
-    return OrderItem(
-      animation: animation,
-      tableOrderID: tableID,
-      cartItem: cartItem,
-      productID: productID,
-      callback: (cartItemRemove, productIDRemove) => removeItem(index, cartItemRemove, productIDRemove) ,
-    );
-  }
-
-  void removeItem(int index, CartItem cartItem, String productID){
-    animationKey.currentState.removeItem(index, (context, animation) => 
-      _builItem(cartItem, tableID, productID, index, animation), duration: Duration(milliseconds: 500),
-    );
-  }
+  // Widget _builItem(CartItem cartItem, String tableID, String productID, int index, Animation<double> animation ){
+  //   return OrderItem(
+  //     animation: animation,
+  //     tableOrderID: tableID,
+  //     cartItem: cartItem,
+  //     productID: productID,
+  //     callback: (cartItemRemove, productIDRemove) => removeItem(index, cartItemRemove, productIDRemove) ,
+  //   );
+  // }
+  //
+  // void removeItem(int index, CartItem cartItem, String productID){
+  //   animationKey.currentState.removeItem(index, (context, animation) =>
+  //     _builItem(cartItem, tableID, productID, index, animation), duration: Duration(milliseconds: 500),
+  //   );
+  // }
 }

@@ -84,6 +84,7 @@ class Tables with ChangeNotifier{
       'received': false,
       'cancelable': false,
     });
+
     WriteBatch batch = FirebaseFirestore.instance.batch();
 
     await batch.set(order.collection('waitersOrder').doc(waiterID), {
@@ -92,6 +93,7 @@ class Tables with ChangeNotifier{
       'time': timeReq,
       'check': false
     });
+
     carts.forEach((item) async{
       await batch.set(order.collection('items').doc(), {
         'id': item.id,
@@ -105,10 +107,12 @@ class Tables with ChangeNotifier{
     });
     batch.commit();
   }
+
   void cancelOrder(String tableNum, String orderID) async{
     final order = FirebaseFirestore.instance.collection('orders').doc(orderID);
     await order.delete();
   }
+
   Future<void> comfirmCheckOut(String orderID, String tableNum, String waiter, String waiterID, DateTime date) async{
     return await FirebaseFirestore.instance.collection('orders').doc(orderID)
         .update({

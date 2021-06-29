@@ -21,7 +21,7 @@ class _TablePageState extends State<TablePage> {
   bool _initialized = false;
   bool _error = false;
   bool _hadMessage = false;
-
+  List<bool> _isOpen = [true, false];
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   void  _getToken(){
     _firebaseMessaging.getToken().then((deviceToken) {
@@ -98,63 +98,180 @@ class _TablePageState extends State<TablePage> {
               child: Scaffold(
                   appBar: AppBar(
                     backgroundColor: Colors.green,
-                    title: Center(
-                      child: Text('Table',
-                        style: TextStyle(fontSize: 30, fontFamily: 'Berkshire Swash', fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
+                    title: Text('Table',
+                      style: TextStyle(fontSize: 30, fontFamily: 'Berkshire Swash', fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
                     ),
+                    centerTitle: true,
                   ),
-                  body: StreamBuilder<List<OrderSnapshot>>(
-                    stream: orders.getAllOrderFromFireBase(),
-                    builder: (context, snapshot){
-                      if(snapshot.hasData){
-                        return GridView.builder(
-                          padding: const EdgeInsets.all(20),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            childAspectRatio: 3/2,
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 10,
-                          ),
-                          itemCount: 15,
-                          itemBuilder: (context, index){
-                            bool hasOrderNotDone = false;
-                            bool requestCheckOut, received;
-                            String orderID;
-                            snapshot.data.forEach((orderData) {
-                              if(orderData.orders.tableId==(index+1).toString()){
-                                hasOrderNotDone = true;
-                                orderID = orderData.orders.orderID;
-                                requestCheckOut = orderData.orders.requestCheckOut;
-                                received = orderData.orders.received;
-                              }
-                            });
-                            if(hasOrderNotDone){
-                              return TableItem(
-                                tableNum: index+1,
-                                waiterName: employee.name,
-                                waiterID: employee.id,
-                                orderID: orderID,
-                                checkout: false,
-                                requestCheckOut: requestCheckOut,
-                                received: received,
+                  body: StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance.collection('tablesCount').doc('CountTablesInCafe').snapshots(),
+                    builder: (context, countTables){
+                      if(countTables.hasData){
+                        int count = int.parse(countTables.data.data()['count'].toString());
+                        return StreamBuilder<List<OrderSnapshot>>(
+                          stream: orders.getAllOrderFromFireBase(),
+                          builder: (context, snapshot){
+                            if(snapshot.hasData){
+                              var _listTableAssign = employee.tableAssign;
+                              _listTableAssign.sort((a,b) => int.parse(a).compareTo(int.parse(b)));
+                              return SingleChildScrollView(
+                                child: Container(
+                                  child:
+                                  ExpansionPanelList(
+                                      animationDuration: Duration(seconds: 1),
+                                      dividerColor:  Colors.green,
+                                      elevation: 1,
+                                      expandedHeaderPadding: EdgeInsets.all(8),
+                                      children: [
+                                        ExpansionPanel(
+                                            headerBuilder: (context, isOpen){
+                                              return ListTile(
+                                                title: Text('Danh Sách Bàn Nhân Viên Phụ Trách', style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Berkshire Swash'
+                                                ),),
+                                              );
+                                            },
+                                            body: GridView.builder(
+                                              physics: NeverScrollableScrollPhysics(),
+                                              shrinkWrap: true,
+                                              padding: const EdgeInsets.all(20),
+                                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 3,
+                                                childAspectRatio: 3/2,
+                                                mainAxisSpacing: 10,
+                                                crossAxisSpacing: 10,
+                                              ),
+                                              itemCount: _listTableAssign.length,
+                                              itemBuilder: (context, index){
+                                                bool hasOrderNotDone = false;
+                                                bool requestCheckOut, received;
+                                                String orderID, waiterRCO;
+                                                Timestamp timeRCO,date,receivedTime;
+                                                snapshot.data.forEach((orderData) {
+                                                  if(orderData.orders.tableId==_listTableAssign[index]){
+                                                    hasOrderNotDone = true;
+                                                    orderID = orderData.orders.orderID;
+                                                    requestCheckOut = orderData.orders.requestCheckOut;
+                                                    received = orderData.orders.received;
+                                                    waiterRCO = orderData.orders.waiterRCO;
+                                                    timeRCO = orderData.orders.timeRCO;
+                                                    date = orderData.orders.date;
+                                                    receivedTime = orderData.orders.receivedTime;
+                                                  }
+                                                });
+                                                if(hasOrderNotDone){
+                                                  return TableItem(
+                                                    tableNum: int.parse(_listTableAssign[index]),
+                                                    waiterRCO: waiterRCO,
+                                                    timeRCO: timeRCO,
+                                                    orderID: orderID,
+                                                    checkout: false,
+                                                    requestCheckOut: requestCheckOut,
+                                                    received: received,
+                                                    date: date,
+                                                    receivedTime: receivedTime,
+                                                    waiterName: employee.name,
+                                                    waiterID: employee.id,
+                                                  );
+                                                }
+                                                else{
+                                                  return TableItem(
+                                                    tableNum: int.parse(_listTableAssign[index]),
+                                                    waiterName: employee.name,
+                                                    waiterID: employee.id,
+                                                    checkout: true,
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                            isExpanded: _isOpen[0]
+                                        ),
+                                        ExpansionPanel(
+                                            headerBuilder: (context, isOpen){
+                                              return ListTile(
+                                                title: Text('Danh Sách Tất Cả Bàn', style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: 'Berkshire Swash'
+                                                ),),
+                                              );
+                                            },
+                                            body: GridView.builder(
+                                              physics: NeverScrollableScrollPhysics(),
+                                              shrinkWrap: true,
+                                              scrollDirection: Axis.vertical,
+                                              padding: const EdgeInsets.all(20),
+                                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 3,
+                                                childAspectRatio: 3/2,
+                                                mainAxisSpacing: 10,
+                                                crossAxisSpacing: 10,
+                                              ),
+                                              itemCount: count,
+                                              itemBuilder: (context, index){
+                                                bool hasOrderNotDone = false;
+                                                bool requestCheckOut, received;
+                                                String orderID, waiterRCO;
+                                                Timestamp timeRCO,date,receivedTime;
+                                                snapshot.data.forEach((orderData) {
+                                                  if(orderData.orders.tableId==(index+1).toString()){
+                                                    hasOrderNotDone = true;
+                                                    orderID = orderData.orders.orderID;
+                                                    requestCheckOut = orderData.orders.requestCheckOut;
+                                                    received = orderData.orders.received;
+                                                    waiterRCO = orderData.orders.waiterRCO;
+                                                    timeRCO = orderData.orders.timeRCO;
+                                                    date = orderData.orders.date;
+                                                    receivedTime = orderData.orders.receivedTime;
+                                                  }
+                                                });
+                                                if(hasOrderNotDone){
+                                                  return TableItem(
+                                                    tableNum: index+1,
+                                                    waiterRCO: waiterRCO,
+                                                    timeRCO: timeRCO,
+                                                    orderID: orderID,
+                                                    checkout: false,
+                                                    requestCheckOut: requestCheckOut,
+                                                    received: received,
+                                                    date: date,
+                                                    receivedTime: receivedTime,
+                                                    waiterName: employee.name,
+                                                    waiterID: employee.id,
+                                                  );
+                                                }
+                                                else{
+                                                  return TableItem(
+                                                    tableNum: index+1,
+                                                    waiterName: employee.name,
+                                                    waiterID: employee.id,
+                                                    checkout: true,
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                            isExpanded: _isOpen[1]
+                                        ),
+                                      ],
+                                      expansionCallback: (i, isOpen) =>
+                                          setState(() =>
+                                          _isOpen[i] = !isOpen
+                                          )
+                                  ),
+                                ),
                               );
                             }
-                            else{
-                              return TableItem(
-                                tableNum: index+1,
-                                waiterName: employee.name,
-                                waiterID: employee.id,
-                                checkout: true,
-                              );
-                            }
+                            return Center(child: CircularProgressIndicator(),);
                           },
                         );
                       }
                       return Center(child: CircularProgressIndicator(),);
                     },
                   ),
+                  
                   drawer: Drawer(
                     child: ListView(
                       // Important: Remove any padding from the ListView.

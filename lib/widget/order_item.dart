@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:do_an_nv_app/modules/cart_item.dart';
 import 'package:do_an_nv_app/modules/tables.dart';
@@ -9,36 +10,56 @@ typedef void MyCallBack(CartItem cartItem, String productID);
 class OrderItem extends StatelessWidget {
   final String tableOrderID; // Id cua Map tableOrderList
   final CartItem cartItem;
-  final Animation animation;
+  // final Animation animation;
   final String productID;
-  final MyCallBack callback;
+  // final MyCallBack callback;
   OrderItem({
     @required this.tableOrderID,
     @required this.cartItem,
     @required this.productID,
-    @required this.animation,
-    @required this.callback,
+    // @required this.animation,
+    // @required this.callback,
   });
   @override
   Widget build(BuildContext context) {
     double size = MediaQuery.of(context).size.width/1000;
     final tableOrder = Provider.of<Tables>(context);
-
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: Offset(-1,0),
-        end: Offset(0, 0),
-      ).animate(CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeIn,
-        reverseCurve: Curves.easeIn
-      )),
+    final radius = Radius.circular(5);
+    final borderRadius = BorderRadius.all(radius);
+    return Dismissible(
+      key: ValueKey(cartItem.id),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction){
+        // callback(cartItem, productID);
+        tableOrder.removeItemInOrder(tableOrderID, productID);
+      },
+      background:
+      Container(
+          margin: EdgeInsets.only(bottom: 15),
+          padding: EdgeInsets.only(right: 50),
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            color: Colors.red,
+          ),
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.delete, color: Colors.white, size: 23,),
+                    Text('Xóa', style: TextStyle(fontSize: 18, color: Colors.white),)
+                  ],
+                )
+              ]
+          )
+      ),
       child: Container(
         margin: EdgeInsets.only(bottom: 15),
         padding: EdgeInsets.only(left: 10,top: 10, bottom: 10),
         decoration: BoxDecoration(
             border: Border.all(width: 1, color: Colors.grey),
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: borderRadius,
             color: Colors.white,
             boxShadow: [
               BoxShadow(
@@ -129,21 +150,37 @@ class OrderItem extends StatelessWidget {
                 ],
               ),
             ),
-            Center(
-              child: IconButton(
-                icon: Icon(Icons.remove_circle_outline),
-                tooltip: 'Remove Item',
-                onPressed: (){
-                  callback(cartItem, productID);
-                  tableOrder.removeItemInOrder(tableOrderID, productID);
-                },
-              ),
-            )
+
+            // Nut xoa
+            // Center(
+            //   child: IconButton(
+            //     icon: Icon(Icons.remove_circle_outline),
+            //     tooltip: 'Remove Item',
+            //     onPressed: (){
+            //       callback(cartItem, productID);
+            //       tableOrder.removeItemInOrder(tableOrderID, productID);
+            //     },
+            //   ),
+            // )
+
           ],
         ),
       ),
+
     );
+    //   SlideTransition(
+    //   position: Tween<Offset>(
+    //     begin: Offset(-1,0),
+    //     end: Offset(0, 0),
+    //   ).animate(CurvedAnimation(
+    //     parent: animation,
+    //     curve: Curves.easeIn,
+    //     reverseCurve: Curves.easeIn
+    //   )),
+    //   child:
+    // );
   }
+
 }
 
 
