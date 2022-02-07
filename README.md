@@ -1,7 +1,9 @@
 # App của nhân viên
 
 Ứng dụng di động hỗ trợ cho nhân viên trong quán cafe đặt đồ uống cho khách tại bàn.
-Công nghệ sử dụng: Flutter và Firebase
+
+Công nghệ sử dụng: Flutter và Firebase.
+
 Ứng dụng bao gồm các chức năng:
 + Lọc và tìm kiếm đồ uống
 + Tạo đơn hàng đồ uống theo từng bàn và gửi cho quầy thu ngân.
